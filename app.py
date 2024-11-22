@@ -73,4 +73,24 @@ def register():
             return redirect(url_for('register'))
     return render_template('register.html')
 
-            
+@app.route("/welcome")
+def welcome():
+    if 'user' in session:
+        username = session['user']
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute('SELECT email FROM users WHERE username = ?', (username,))
+        email = cursor.fetchone()[0]
+        conn.close()
+        return render_template("welcome.html", username=username, email=email)
+    else:
+        return redirect(url_for('login'))
+    
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    flash('Logged out successfully', 'info')
+    return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(debug=True)       
